@@ -1,0 +1,1340 @@
+# Contribution Ledger (CL)
+
+## A Decentralized Ledger of Contribution, Reputation, and Access — Without Cryptocurrency
+
+**Version:** 1.2  
+**Status:** Public draft for discussion  
+**Author:** [mikky1sCp]  
+**Date:** [19.09.2026]  
+**License:** CC BY-SA 4.0 (text) / MIT or Apache 2.0 (code)
+
+---
+
+## Table of Contents
+
+1. Abstract
+2. Philosophy and Motivation
+3. Value for Participants (Summary)
+4. The Problem
+5. Why Not a Cryptocurrency
+6. System Overview
+7. Identity Model
+8. Contribution Model
+9. Reputation Model
+10. Ledger and Data Structures
+11. Consensus and Validators
+12. Governance and Voting
+13. Economics: How Participants Earn
+14. Useful Work: CU for Compute and Community Help
+15. Privacy and Security
+16. Threats and Defenses
+17. Use Cases
+18. Architecture and Stack
+19. Roadmap
+20. Project Governance
+21. Open Questions
+22. Conclusion
+23. Appendices
+
+---
+
+## 1. Abstract
+
+Contribution Ledger (CL) is an open, decentralized ledger that records the contributions of participants to communities, projects, and organizations. It uses cryptographic signatures, hash structures, federated consensus, and peer-to-peer synchronization — yet it is **not a cryptocurrency**.
+
+CL has no transferable token, no mining, no exchange, and no speculation. Instead of money, it uses **non-transferable Contribution Units (CU)** and **reputation** bound to a participant's identity. These cannot be bought, sold, transferred, or collateralized. They are earned through verified actions and confirmed by the community.
+
+CL delivers **real profit** to people: money for work, access to opportunities, influence over decisions, and trust capital. This profit comes from outside the system — from organizations, clients, grant funds, and cooperatives — not from token emission.
+
+CL is infrastructure for trust and coordination, not a financial instrument.
+
+---
+
+## 2. Philosophy and Motivation
+
+We hold several principles.
+
+**Contribution over capital.** In communities, value is created by actions, not money. The system must reflect this.
+
+**Reputation is not for sale.** If reputation can be bought, it loses meaning. CU transfer is therefore forbidden at the protocol level.
+
+**Profit from work, not from speculation.** People should earn from what they do, not from luckily buying a token.
+
+**Transparency without total surveillance.** Rules are public; personal data is not stored in the open.
+
+**Communities over platforms.** No corporation should own a person's reputation.
+
+**Technology without speculation.** Cryptography and distributed systems are powerful tools. But a monetary function is not mandatory.
+
+**Federation over monolith.** Different communities have different rules. They interoperate but do not submit to each other.
+
+**Right to exit.** Any participant or community can fork the ledger and leave with their data.
+
+---
+
+## 3. Value for Participants (Summary)
+
+**If you are looking for token gains, go to crypto. If you want your work to bring money, jobs, access, and influence — CL is for you.**
+
+What a person gets:
+
+- **Money for contribution.** Bounties, contracts, grants, cooperative payouts, salaries based on verified reputation.
+- **Work and clients.** A verifiable portfolio that cannot be deleted or faked.
+- **Grants and funding.** Transparent allocation by contribution, not connections.
+- **A share in a cooperative.** Payouts proportional to contribution, without buying equity.
+- **Access and roles.** Reputation opens jobs, projects, resources.
+- **Influence.** A vote that cannot be bought.
+- **Savings.** Fewer platform fees and intermediaries.
+- **Trust capital.** Access to investment and partnerships without collateral.
+
+Detailed in **Section 13, "Economics: How Participants Earn."**
+
+---
+
+## 4. The Problem
+
+Today, tracking contribution and reputation fails in both extremes.
+
+### 4.1. Centralized Systems
+
+- Reputation belongs to the platform: Stack Overflow, GitHub, LinkedIn, Upwork.
+- Users cannot move their achievements.
+- Rules change without community consent.
+- Data can be deleted, faked, sold.
+- Moderation is opaque.
+- Accounts can vanish with the service.
+- Freelancers pay 10–30% in fees.
+- Workers cannot prove skills without a resume.
+
+### 4.2. Cryptocurrency Systems
+
+- The token becomes a speculative asset.
+- Votes and reputation are bought with money.
+- Mining and fees create a financial barrier.
+- Anonymity prevents real accountability.
+- The goal shifts from usefulness to token price.
+- Governance is captured by whales.
+- Profit goes to early buyers, not workers.
+
+### 4.3. What Is Needed
+
+A system that:
+
+- records contribution transparently and immutably;
+- does not allow reputation to be bought;
+- works without a central server;
+- respects privacy;
+- lets communities set their own rules;
+- does not become an exchange;
+- gives participants control over their data;
+- **delivers real profit to those who work.**
+
+---
+
+## 5. Why Not a Cryptocurrency
+
+CL uses many blockchain technologies but deliberately rejects the monetary function.
+
+| Property | Cryptocurrency | Contribution Ledger |
+|---|---|---|
+| Unit of account | Transferable token | Non-transferable CU |
+| Transfer to third parties | Allowed | Forbidden by protocol |
+| Buy/sell | Via exchanges | Impossible |
+| Emission | By algorithm | For verified contribution |
+| Incentive | Price profit | Work profit |
+| Consensus | PoW/PoS | Federated / reputational |
+| Anonymity | Full | Pseudonymous or verified |
+| Purpose | Money from air | Trust and coordination |
+| Regulation | Financial | Civil / organizational |
+| Who gets rich | Early buyers | Those who work |
+
+**Key rule:** any protocol modification that allows CU transfer turns the system into a cryptocurrency and is excluded from the specification.
+
+---
+
+## 6. System Overview
+
+CL has five layers.
+
+### 6.1. Identity Layer
+Keys, DIDs, attestations, membership.
+
+### 6.2. Contribution Layer
+Records of actions: commits, reviews, help, moderation, teaching, voting.
+
+### 6.3. Reputation Layer
+Aggregation of CU into a reputation weight. Affects rights and votes.
+
+### 6.4. Ledger Layer
+Append-only log, Merkle structures, synchronization, federation.
+
+### 6.5. Application Layer
+Voting, access, roles, bounties, grants, integrations, interfaces.
+
+Each layer is independent: reputation can be replaced without changing the ledger, and identity can be used without reputation.
+
+---
+
+## 7. Identity Model
+
+### 7.1. Identifier
+
+Every participant generates a keypair. The public key forms the identifier:
+
+```
+did:cl:<network>:<base58-pubkey>
+```
+
+Example:
+```
+did:cl:main:7Xk9fQ2mNpL3vR8sT1wY6zA4bC5dE6fG
+```
+
+The identifier contains no personal data. It is just a key.
+
+### 7.2. Identity Levels
+
+| Level | How to obtain | Rights |
+|---|---|---|
+| Anonymous | Generate key | Read, limited write |
+| Pseudonymous | Invitation from a member | Contribution, reputation |
+| Verified | Verification via organization/domain | Vote, roles, bounties |
+| Organizational | Organization key | Attestation issuance, bounties |
+
+### 7.3. Identity Binding
+
+CL does not store passport data. Instead, it uses **attestations**:
+
+```
+"did:cl:org:university attests that did:cl:main:alice is a student"
+```
+
+The attestation is signed by the organization. The identity itself remains outside the ledger.
+
+### 7.4. Recovery
+
+- Social recovery: 3 of 5 trusted contacts.
+- Multisig: key + organization.
+- Backup key stored offline.
+
+Key loss must not mean reputation loss. Recovery is part of the protocol.
+
+### 7.5. Multiple Identities
+
+A participant may have several DIDs for different communities. CL does not require a single global identity. Linking is optional, via proof of control.
+
+---
+
+## 8. Contribution Model
+
+### 8.1. What Counts as Contribution
+
+Contribution is an action a community recognizes as useful. Examples:
+
+- writing code;
+- reviewing code;
+- documentation;
+- answering questions;
+- moderation;
+- mentorship;
+- event organization;
+- translation;
+- design;
+- testing;
+- voting on rules;
+- completing bounties;
+- financial support (but not buying CU);
+- contributing compute power (see Section 14).
+
+Each community defines its own list.
+
+### 8.2. Record Structure
+
+```json
+{
+  "type": "contribution",
+  "version": 1,
+  "subject": "did:cl:main:alice",
+  "issuer": "did:cl:org:projectX",
+  "action": "code_commit",
+  "context": "repo:github.com/x/y",
+  "weight_class": "commit",
+  "evidence": [
+    {"type": "hash", "algo": "sha256", "value": "..."},
+    {"type": "link", "value": "ipfs://..."}
+  ],
+  "timestamp": 1730000000,
+  "nonce": 42,
+  "signature": "ed25519:..."
+}
+```
+
+### 8.3. Who Creates a Record
+
+- **The participant** — claims contribution.
+- **The issuer** — organization, project, mentor.
+- **An automated system** — e.g., a Git hook.
+- **The bounty system** — on task completion.
+
+A contribution becomes valid only after confirmation.
+
+### 8.4. Confirmation
+
+- One or more confirmers.
+- Rules define who may confirm which contribution.
+- Thresholds: e.g., 1 confirmation for small, 3 for large.
+- Disputes: appeal to auditors.
+
+### 8.5. Weight
+
+Weight is not money. It is a dimensionless value a community assigns to an action type. Example:
+
+| Action | Weight |
+|---|---|
+| Commit | 1 |
+| Review | 2 |
+| Mentorship (hour) | 5 |
+| Moderation | 3 |
+| Event organization | 10 |
+| Completed bounty | 5–50 |
+| Compute hour (verified) | 3–20 |
+
+Weights are calibrated by the community and may change by vote.
+
+### 8.6. Decay
+
+CU may decay over time. This prevents frozen power and encourages ongoing contribution. Parameters:
+
+- half-life: e.g., 2 years;
+- floor: CU does not fall below it;
+- exceptions: significant contributions may not decay.
+
+Decay is optional. The community decides.
+
+### 8.7. Revocation
+
+If a contribution is harmful, fraudulent, or erroneous, the record can be **revoked**:
+
+- not deleted, but marked revoked;
+- CU are deducted;
+- the reason is recorded in the ledger;
+- the decision is made by vote or auditors.
+
+History is preserved. The ledger is append-only, but a record's status may change.
+
+---
+
+## 9. Reputation Model
+
+### 9.1. What Reputation Is
+
+Reputation is an aggregate of CU, weighted by:
+
+- contribution weight;
+- decay;
+- quality (confirmations, disputes);
+- context (which community);
+- time.
+
+Reputation is not an absolute number. It is **contextual**: reputation in project X is not reputation in community Y.
+
+### 9.2. Formula (Base)
+
+```
+R(u, c, t) = Σ over contributions i in context c:
+    w_i * q_i * d(t - t_i) * s_i
+```
+
+Where:
+- `w_i` — contribution weight;
+- `q_i` — quality coefficient (0..1), based on confirmations and disputes;
+- `d(Δt)` — decay function;
+- `s_i` — revocation coefficient (0 if revoked, 1 if active).
+
+### 9.3. Levels
+
+A community may define levels:
+
+| Level | Threshold R | Rights |
+|---|---|---|
+| Newbie | 0 | Read, small contributions |
+| Member | 10 | Contribute, comment, bounties |
+| Trusted | 100 | Confirm, moderate |
+| Veteran | 500 | Vote, create projects |
+| Council | 2000 | Governance, audit, grants |
+
+Thresholds are examples. Each community configures its own.
+
+### 9.4. Reputation and Power
+
+Reputation grants:
+
+- vote weight;
+- right to confirm;
+- access to resources;
+- right to create projects;
+- right to audit;
+- priority in bounties and grants.
+
+But reputation does **not** grant:
+
+- the right to transfer it;
+- the right to sell it;
+- the right to convert it into money;
+- absolute power (thresholds and coalitions are required).
+
+### 9.5. Delegation
+
+A participant may delegate their vote to another — but not CU. Delegation:
+
+- is temporary;
+- is revocable;
+- transfers only the vote, not reputation;
+- is recorded in the ledger.
+
+This lets experts represent interests without buying votes.
+
+---
+
+## 10. Ledger and Data Structures
+
+### 10.1. Append-Only Log
+
+CL is a log of events. Each event:
+
+- is signed;
+- is hashed;
+- links to previous events via Merkle structures;
+- is immutable after finalization.
+
+Deletion is forbidden. Revocation happens via a new event.
+
+### 10.2. Event Types
+
+- `identity.create`
+- `identity.attest`
+- `identity.recover`
+- `identity.key_rotate`
+- `contribution.create`
+- `contribution.confirm`
+- `contribution.revoke`
+- `bounty.create`
+- `bounty.claim`
+- `bounty.submit`
+- `bounty.complete`
+- `bounty.cancel`
+- `payment.record`
+- `compute.task.create`
+- `compute.task.claim`
+- `compute.task.submit`
+- `compute.task.verify`
+- `reputation.update`
+- `vote.create`
+- `vote.cast`
+- `vote.close`
+- `vote.delegate`
+- `role.grant`
+- `role.revoke`
+- `validator.add`
+- `validator.remove`
+- `rule.change`
+- `checkpoint`
+- `fork.declare`
+
+### 10.3. Blocks and DAG
+
+For scalability, CL uses a **DAG** (directed acyclic graph) instead of a linear chain. This enables:
+
+- parallel writes;
+- multiple validators simultaneously;
+- fast finalization.
+
+Each event references parent hashes. Topological order ensures consistency.
+
+### 10.4. Merkle Proofs
+
+Every event can be proven via a Merkle path to a root. This enables:
+
+- verifying data without a full copy;
+- storing only headers;
+- lightweight clients.
+
+### 10.5. Storage
+
+- **Full nodes** — entire ledger.
+- **Light nodes** — headers and Merkle proofs.
+- **Archive nodes** — full history including metadata.
+- **External storage** — IPFS, Arweave for evidence.
+
+### 10.6. Synchronization
+
+- Gossip protocol for event propagation.
+- Header exchange for fast verification.
+- Request of missing events.
+- Conflict resolution per consensus rules.
+
+---
+
+## 11. Consensus and Validators
+
+### 11.1. Why Not PoW or PoS
+
+- PoW wastes energy and creates a hash-rate race.
+- PoS creates plutocracy: the rich get richer.
+- Both assume a monetary token.
+
+CL uses **federated consensus** with reputational validators.
+
+### 11.2. Validators
+
+A validator is a node that:
+
+- verifies events;
+- signs finalization;
+- participates in voting;
+- stores the ledger.
+
+Validators are chosen by the community. Criteria:
+
+- technical reliability;
+- reputation;
+- independence;
+- availability.
+
+Validators cannot be bought. They can only be earned.
+
+### 11.3. Finalization Threshold
+
+An event is finalized when it has:
+
+- 2/3 of validator signatures, or
+- 1/2 plus special rules for small communities.
+
+For small groups, a single trusted node mode is possible.
+
+### 11.4. Rotation
+
+Validators rotate:
+
+- every N months;
+- by vote;
+- automatically on inactivity.
+
+This prevents capture.
+
+### 11.5. Fork
+
+If validators collude or break rules:
+
+- the community can fork the ledger;
+- participants keep their DIDs and CU;
+- the new ledger continues from the same state.
+
+Fork is a right, not a catastrophe.
+
+### 11.6. Federation
+
+Different communities have different ledgers. They may:
+
+- exchange attestations;
+- recognize each other's CU (by agreement);
+- create shared spaces;
+- remain independent.
+
+Federation is a network of ledgers, not one global ledger.
+
+---
+
+## 12. Governance and Voting
+
+### 12.1. What Is Decided by Vote
+
+- Rule changes.
+- Adding/removing validators.
+- Changing contribution weights.
+- Reputation thresholds.
+- Budgets and grants.
+- Disputed cases.
+- Distribution of cooperative revenue.
+
+### 12.2. Vote Weight
+
+Vote weight = f(reputation, tenure, role). Examples:
+
+- 1 member = 1 vote (for simple decisions);
+- quadratic weight: √R (against plutocracy);
+- delegation.
+
+### 12.3. Quadratic Voting
+
+To prevent whale dominance, quadratic weight is used:
+
+```
+vote = sign(v) * sqrt(R)
+```
+
+This makes accumulating power expensive even at high reputation.
+
+### 12.4. Voting Types
+
+- **Simple majority** — routine.
+- **Qualified** — 2/3 for important decisions.
+- **Consensus** — 90% for constitutional changes.
+- **Veto** — a minority can block irreversible decisions.
+
+### 12.5. Transparency
+
+All votes are recorded in the ledger. One can verify:
+
+- who voted;
+- how;
+- with what weight;
+- when.
+
+Secret voting is possible via ZK proofs: the result is verifiable, the choice is not.
+
+### 12.6. Appeals
+
+Any decision can be challenged:
+
+- appeal period: N days;
+- auditors review;
+- final decision by vote.
+
+---
+
+## 13. Economics: How Participants Earn
+
+**If you do not see your benefit here, you may stop reading.**
+
+CL does not offer token gains. There is no token. But it delivers **real profit in money, work, access, and influence**. Below are concrete schemes.
+
+### 13.1. Core Principle
+
+Profit comes from **outside**: from organizations, clients, funds, cooperatives, communities. It does not come from token emission, from air, or from the pockets of new participants.
+
+The ledger is **proof of contribution**. Money is **separate**. Reputation opens access to money but does not replace it.
+
+| Cryptocurrency | Contribution Ledger |
+|---|---|
+| Profit from token price | Profit from paid contribution |
+| Early buyers gain at the expense of late ones | No one gains at another's expense |
+| Needs new money to grow | Needs organizations that pay for work |
+| Profit for speculators | Profit for workers |
+| Zero-sum | Positive-sum |
+
+### 13.2. Scheme 1: Bounties and Direct Payment
+
+An organization posts a task in CL:
+
+```json
+{
+  "type": "bounty",
+  "issuer": "did:cl:org:startupX",
+  "task": "Write API documentation",
+  "reward": {"amount": 500, "currency": "USD"},
+  "deadline": 1730100000,
+  "requirements": ["3 reviews", "grammar check"]
+}
+```
+
+A participant claims the task, completes it, the community confirms the contribution. The organization pays $500 in fiat or stablecoin. The contribution record stays in the ledger forever.
+
+**Participant gets:** money, CU, reputation, portfolio record.
+
+**Organization gets:** verified executor, transparent accounting, lower fraud risk.
+
+**Real amounts:** small task $20–100, medium $100–1000, large $1000–10 000, long-term contract — salary.
+
+### 13.3. Scheme 2: Work via Reputation
+
+An employer views a CL profile: 340 commits, 120 reviews, 50 hours of mentorship, reputation 780 in "backend," 12 attestations from organizations.
+
+This is a verifiable portfolio. Not a resume that can be fabricated. Not reviews that can be bought.
+
+**Participant gets:** offers, contracts, invitations, access to private vacancies, better terms.
+
+**Employer gets:** less hiring risk, savings on screening, faster filtering.
+
+**Example:** a freelancer does not start from zero. Reputation belongs to them, moves across platforms, is cryptographically verifiable.
+
+**Profit:** salaries and rates 2–10× higher than an anonymous worker without reputation.
+
+### 13.4. Scheme 3: Grants and Funds
+
+Funds (NLnet, Open Technology Fund, Mozilla, EU, local) distribute money to open-source and public projects. Today the process is opaque: applications, letters, subjective committee decisions.
+
+In CL, contribution is visible, reputation is verifiable, the fund sees whom the community trusts, and payments are recorded.
+
+**Participant gets:** grants from $5 000 to $500 000, transparent process, less bureaucracy, grantee reputation.
+
+**Fund gets:** confidence in the executor, transparent reporting, less misuse risk.
+
+**Real example:** a maintainer of a popular library receives a $50 000 grant because their contribution is visible and confirmed. Without CL, they spend months on applications.
+
+### 13.5. Scheme 4: Cooperative Payouts
+
+A cooperative earns money. Revenue is distributed by rules:
+
+```
+member share = their CU / total CU * distributable amount
+```
+
+CU is non-transferable. It cannot be bought. It can only be earned.
+
+**Example:** cooperative earned $100 000 in a year. Total CU = 10 000. Alice has 500 CU. Her share:
+
+```
+500 / 10 000 * 100 000 = $5 000
+```
+
+**Participant gets:** revenue share, transparent calculation, vote on distribution, protection from CU purchases.
+
+**This is not stock dividends.** CU is not equity; it cannot be sold. It is a share in the common result of labor.
+
+### 13.6. Scheme 5: Paid Communities
+
+A closed community charges membership dues. Money goes to validators, grants, infrastructure, events, moderators.
+
+**Example:** 500 members, $10/month = $5 000/month.
+- $2 000 — validators;
+- $1 500 — grants to active members;
+- $1 000 — infrastructure;
+- $500 — reserve.
+
+**Participant gets:** access to knowledge, networking, grant eligibility, influence.
+
+### 13.7. Scheme 6: Roles and Access as Profit
+
+Reputation opens roles (maintainer, auditor, curator), access to resources, the right to create projects, the right to distribute grants.
+
+**Example:** a participant with reputation 2000 in "security" is authorized to audit (fee $5 000–50 000), invited to councils, granted access to private data.
+
+**Profit:** money + influence + career.
+
+### 13.8. Scheme 7: Savings on Intermediaries
+
+CL replaces freelance platforms (10–20% fee), HR agencies (15–30%), legal checks, verification services, reputation platforms.
+
+**Example:** a freelancer earns $10 000 via Upwork. Fee: $1 500. Via CL: 0–2%. Savings: $1 300–1 500 per deal.
+
+### 13.9. Scheme 8: Reputation as Capital
+
+High reputation is access to money, not money itself:
+
+- an investor funds a project because the founder has reputation 5000;
+- a fund grants because the participant is community-verified;
+- a client pays upfront because reputation guarantees quality;
+- a partner joins because they trust the reputation.
+
+**Profit:** access to capital without collateral, credit history, or intermediaries.
+
+### 13.10. Summary Table of Profit
+
+| Source | Who pays | Amount | Frequency |
+|---|---|---|---|
+| Bounties | Organization | $20–10 000 | Per task |
+| Work via reputation | Employer | Salary | Ongoing |
+| Grants | Funds | $5 000–500 000 | Per project |
+| Cooperative payouts | Cooperative | Revenue share | Per period |
+| Paid communities | Members | Access, grants | Monthly |
+| Roles and access | Organizations | $5 000–50 000 | Per contract |
+| Savings on intermediaries | — | 10–30% | Per deal |
+| Reputation as capital | Investors, funds | Access to capital | As needed |
+| Compute tasks | Task issuers | $0.10–10/hour | Per task |
+
+### 13.11. What CL Does Not Have
+
+To avoid illusions:
+
+- **No token.** Nothing to buy or sell.
+- **No moonshots.** Reputation does not rise in price.
+- **No passive income.** You cannot buy CU and earn interest.
+- **No fast money.** Profit comes from work.
+- **No guarantees.** If a community is poor, there will be no money.
+
+CL is not for those who want to get rich by speculation. CL is for those who want their work to bring money, jobs, access, and influence.
+
+### 13.12. Who CL Profits and Who It Does Not
+
+**Profits:**
+- freelancers and specialists — work and contracts;
+- maintainers — grants and reputation;
+- volunteers — recognition and access;
+- cooperatives — fair distribution;
+- communities — independence and funding;
+- organizations — verified executors.
+
+**Does not profit:**
+- speculators — nothing to buy;
+- rentiers — no passive income;
+- scammers — cannot rug and leave;
+- those unwilling to work — CU cannot be bought.
+
+### 13.13. Example: A Participant's 3-Year Path
+
+**Year 1.** Alice registers, makes 50 commits, 20 reviews, 10 hours of mentorship. Earns 400 CU. First bounties: $2 000 for the year.
+
+**Year 2.** Reputation 1 200. Grant of $15 000 for open-source. Contracts via CL: $30 000 for the year. Becomes a validator.
+
+**Year 3.** Reputation 3 500. Leads her own project with fund backing: $50 000. Cooperative payouts: $20 000. Invited to the council of two organizations.
+
+**Total over 3 years:** ~$117 000 + reputation + access + influence. Not moonshots. A career.
+
+### 13.14. Funding the CL Project Itself
+
+- grants (NLnet, OTF, Mozilla, EU, local funds);
+- donations;
+- community membership dues;
+- integration services;
+- organizational support.
+
+The founder and team do not sell a token. They receive grants and payment for work.
+
+### 13.15. Prohibition on CU Monetization
+
+The protocol forbids:
+
+- transferring CU;
+- selling CU;
+- collateralizing CU;
+- exchanging CU for anything;
+- derivatives on CU.
+
+Any integration violating this is incompatible with CL.
+
+### 13.16. Why This Is More Sustainable Than Cryptocurrency
+
+- **No bubble.** Profit from real work.
+- **No rug pulls.** CU cannot be sold and abandoned.
+- **No plutocracy.** The rich do not buy power.
+- **No dependence on new participants.** Works without speculators.
+- **No regulatory risk of securities.** No token, no securities.
+
+### 13.17. Section Summary
+
+Profit in CL is:
+
+- **money** from work, bounties, grants, cooperatives;
+- **access** to roles, resources, opportunities;
+- **influence** through voting and governance;
+- **capital** through reputation and trust;
+- **savings** on intermediaries.
+
+This is not speculation. It is the **economics of contribution**.
+
+---
+
+## 14. Useful Work: CU for Compute and Community Help
+
+### 14.1. The Idea
+
+Instead of mining, participants can contribute **useful work**:
+
+- donating compute power to train AI models;
+- supporting network infrastructure (relays, storage, indexing);
+- helping the community (moderation, translation, verification, mentoring);
+- running simulations, rendering, scientific computations.
+
+This is not mining. Mining burns energy for a hash. Useful work produces a verifiable result that someone needs.
+
+### 14.2. The Trap
+
+As soon as "connect compute — earn CU" appears, people assume **CU can be sold**. Then:
+
+1. Someone offers to buy CU for money.
+2. A "CU rate" emerges.
+3. An exchange appears.
+4. Speculation follows.
+5. You are back in crypto.
+
+The second problem is **verifying that work was actually done honestly**:
+
+- weak machines claim to be strong;
+- tasks are duplicated;
+- results are plagiarized;
+- bots farm CU.
+
+These are classical problems of Proof of Useful Work. No project has fully solved them. Golem, iExec, Bittensor all struggle with verification.
+
+### 14.3. Three Rules to Avoid Cryptocurrency
+
+**1. CU are awarded only for a verified result, not for time online.**
+Not "connected GPU for an hour — earned 10 CU." Instead: "trained a model, metric X, result verified — earned 50 CU."
+
+**2. The task issuer pays in money.**
+Someone (a company, fund, or researcher) pays for compute. Money goes to the executor. CU is a reputation bonus. Profit comes from a real customer, not from air.
+
+**3. CU cannot be exchanged for money directly.**
+Only through cooperative payouts per community rules. This removes the incentive to farm and sell.
+
+### 14.4. Verification Methods
+
+From simple to complex:
+
+- **Redundancy.** One task is given to 3 executors. If results match — all receive CU. If not — review.
+- **Sampling.** 5% of tasks are manually audited.
+- **Cryptographic proofs.** For some tasks (ZK computations), mathematical proof exists.
+- **Reputation.** New executors are checked strictly; experienced ones more leniently.
+- **Reference comparison.** Known correct answers for test tasks.
+
+For AI training, the simplest check: task = training, metric = validation set performance. If the model achieves the claimed quality — work is credited.
+
+### 14.5. Task Lifecycle
+
+```
+compute.task.create → compute.task.claim → compute.task.submit
+                                              ↓
+                                    compute.task.verify
+                                              ↓
+                                     payment.record + CU
+```
+
+### 14.6. Task Types (Progressive)
+
+**Phase 1 — Community help (available from day one):**
+- moderation;
+- translation;
+- documentation;
+- testing;
+- mentoring.
+
+**Phase 2 — Small compute tasks (100+ members):**
+- rendering;
+- simulations;
+- test runs;
+- data processing;
+- indexing.
+
+**Phase 3 — AI and large-scale compute (1000+ members, 50+ GPUs):**
+- model training;
+- fine-tuning;
+- inference;
+- dataset labeling;
+- federated learning.
+
+### 14.7. Pricing
+
+Task issuer sets a price in fiat or stablecoin. CL records the payment. Example rates:
+
+| Task | Rate |
+|---|---|
+| Moderation hour | $5–15 |
+| Translation (per 1000 words) | $10–30 |
+| GPU hour (consumer) | $0.10–0.50 |
+| GPU hour (datacenter) | $1–5 |
+| AI training job | $50–5000 |
+| Inference (per 1000 requests) | $0.5–5 |
+
+Rates are market-driven, set by the issuer.
+
+### 14.8. Why This Matters
+
+If it works, CL has a strong argument:
+
+- "You don't just click likes — you invest compute power in the common cause."
+- "You don't mine for nothing — you train models that bring value."
+- "You don't buy CU — you earn it by work."
+
+This distinguishes CL from crypto and from ordinary reputation systems.
+
+### 14.9. Sequence
+
+1. **11 people.** Just the contribution ledger. No compute.
+2. **50–100 people.** First bounties: not compute, but code, documentation, moderation.
+3. **200–500 people.** Trial distributed compute on small tasks: rendering, simulation, tests.
+4. **1000+ people.** Only then AI and serious compute.
+
+Starting compute on 11 people is a toy no one will use.
+
+### 14.10. Anti-Abuse
+
+- Sybil resistance via attestation and reputation.
+- Redundancy and sampling.
+- Staking CU (not money) for task claims — slashed on fraud.
+- Rate limits for new executors.
+- Public audit trail for every task.
+
+---
+
+## 15. Privacy and Security
+
+### 15.1. Principles
+
+- Minimal data in the ledger.
+- Personal data off-ledger.
+- Selective disclosure.
+- Right to be forgotten via link revocation.
+- Zero-knowledge for sensitive cases.
+
+### 15.2. What Is Stored On-Ledger
+
+- DID;
+- evidence hashes;
+- signatures;
+- contribution metadata (type, weight);
+- votes;
+- decisions;
+- payment records (amount, currency, no personal data);
+- compute task records.
+
+### 15.3. What Is Not Stored
+
+- names;
+- emails;
+- passports;
+- repository contents;
+- private messages;
+- biometrics;
+- bank details.
+
+### 15.4. Selective Disclosure
+
+A participant can prove:
+
+- "my reputation > X" without revealing all contributions;
+- "I am a member of organization" without revealing identity;
+- "I voted" without revealing the choice.
+
+Via ZK proofs (zk-SNARK, Bulletproofs).
+
+### 15.5. Encryption
+
+- Transport: TLS, Noise.
+- Storage: optional, for private communities.
+- Keys: on the user's device.
+
+### 15.6. Auditing
+
+- Open source.
+- Independent audits.
+- Bug bounty.
+- Public reports.
+
+---
+
+## 16. Threats and Defenses
+
+### 16.1. Sybil Attack
+
+**Threat:** many fake accounts inflate reputation.
+
+**Defense:** invitations, entry cost (reputation, not money), verification via organizations, analysis of the attestation graph, rate limits on new accounts.
+
+### 16.2. Validator Collusion
+
+**Threat:** validators sign false events.
+
+**Defense:** rotation, thresholds, independence, auditing, fork.
+
+### 16.3. Contribution Forgery
+
+**Threat:** a participant claims a contribution that did not happen.
+
+**Defense:** evidence (hashes, links), issuer confirmation, automated verification, appeals.
+
+### 16.4. Reputation Purchase
+
+**Threat:** a wealthy participant buys CU.
+
+**Defense:** protocol-level transfer ban, anomaly detection, revocation, community exclusion.
+
+### 16.5. Censorship
+
+**Threat:** validators block a participant.
+
+**Defense:** multiple ledgers, federation, fork, right to export data.
+
+### 16.6. Governance Capture
+
+**Threat:** a group seizes voting.
+
+**Defense:** quadratic voting, minority veto, constitutional changes requiring consensus, role rotation.
+
+### 16.7. Data Leak
+
+**Threat:** personal data leak.
+
+**Defense:** minimal on-ledger data, encryption, ZK, no central storage.
+
+### 16.8. Privacy Attack
+
+**Threat:** deanonymization via graph analysis.
+
+**Defense:** ZK proofs, pseudonyms, identity separation, metadata noise.
+
+### 16.9. Legal Risk
+
+**Threat:** regulators treat CU as securities.
+
+**Defense:** explicit transfer ban, no exchanges, no emission, NGO/cooperative legal form, legal counsel from day one.
+
+### 16.10. Bounty Fraud
+
+**Threat:** a participant takes a bounty and does not deliver, or delivers poorly.
+
+**Defense:** escrow, milestone payments, community confirmation, reputation penalty, arbitration.
+
+### 16.11. Compute Fraud
+
+**Threat:** fake compute results, stolen work, bot farms.
+
+**Defense:** redundancy, sampling, CU staking (slashed on fraud), reputation, rate limits.
+
+---
+
+## 17. Use Cases
+
+### 17.1. Open Source
+Commits, reviews, documentation tracking. Maintainer reputation. Transparent grant distribution. Development voting. Corporate bounties.
+
+### 17.2. Cooperatives
+Labor accounting. Resource distribution. Voting. Roles and access. Payouts by CU.
+
+### 17.3. Housing Associations
+Transparent decisions. Voting. Contribution to improvement. Neighbor trust.
+
+### 17.4. Education
+Skill attestation. Portfolio without a platform. Verifiable diplomas. Teacher reputation.
+
+### 17.5. Volunteering
+Contribution tracking without money. Motivation through recognition. Donor reporting.
+
+### 17.6. Supply Chain
+Provenance attestation. Quality audit. Participant trust.
+
+### 17.7. Municipal Governance
+Voting. Transparent budgets. Public contribution tracking.
+
+### 17.8. Scientific Communities
+Peer review. Priority of discovery. Researcher reputation.
+
+### 17.9. Tokenless DAO
+Governance without speculation. Contribution instead of capital. Reputation instead of token votes.
+
+### 17.10. Freelance and Labor Market
+Profile, portfolio, bounties, escrow, reputation portable across platforms.
+
+### 17.11. Distributed AI and Compute
+Training, inference, labeling, simulation, rendering — verified and paid by task issuers.
+
+---
+
+## 18. Architecture and Stack
+
+### 18.1. Components
+
+- **Core** — events, signatures, Merkle, DAG.
+- **Network** — libp2p or custom gossip.
+- **Storage** — Postgres, SQLite, RocksDB.
+- **Cryptography** — Ed25519, X25519, BLAKE3, SHA-256.
+- **ZK** — optional, halo2, arkworks.
+- **API** — gRPC, REST, GraphQL.
+- **Clients** — web, mobile, CLI.
+- **Integrations** — Git, messengers, LMS, payment systems, compute schedulers (Slurm, Kubernetes, Ray).
+
+### 18.2. Recommended Stack
+
+- Core: **Rust** or **Go**.
+- Network: **libp2p**.
+- Storage: **Postgres** + **SQLite** for light nodes.
+- API: **gRPC** + **REST**.
+- Web: **TypeScript** + **React**.
+- Mobile: **React Native** or **Flutter**.
+- Crypto: **libsodium** or **dalek** (Rust).
+- Compute scheduler: **Ray** or **Kubernetes** for distributed tasks.
+
+### 18.3. Modularity
+
+Each layer can be replaced: custom reputation, custom consensus, custom storage, custom interface. This lets communities experiment without breaking compatibility.
+
+### 18.4. Openness
+
+- Code: MIT or Apache 2.0.
+- Specification: CC BY-SA 4.0.
+- Data: owned by participants.
+- Governance: open.
+
+---
+
+## 19. Roadmap
+
+### Year 1. Foundation
+Whitepaper v1.0. Protocol specification. MVP: single node, keys, signatures, ledger. Web interface. Pilot with 10–50 people. First co-authors.
+
+### Year 2. Pilot and Federation
+Federated consensus. 3–5 communities, 100–500 users. Reputation with decay. First bounties and payments. Grants and legal form. First security audit.
+
+### Year 3. Protocol v1.0
+P2P synchronization. Privacy and ZK. Mobile client. SDK. 5–10 thousand users. First cooperative payouts. First compute pilot (small tasks).
+
+### Year 4. Ecosystem
+Standardization. Integrations with Git, LMS, payment systems, compute schedulers. Self-funding. Developer community. AI training pilot.
+
+### Year 5. Sustainability
+Decentralized governance. Independent teams. Project runs without the founder. Distributed compute at scale.
+
+---
+
+## 20. Project Governance
+
+### 20.1. Early Stage
+Founder + 2–3 co-authors. Consensus decisions. Transparent discussions.
+
+### 20.2. Mature Stage
+Foundation or cooperative. Council of elected members. Open RFCs. Public reports.
+
+### 20.3. Principles
+No single owner. No project sale. No token. Open code. Participants can fork.
+
+---
+
+## 21. Open Questions
+
+- How to measure contribution in creative and subjective fields?
+- How to avoid political games?
+- How to protect privacy while punishing harm?
+- Is a global ledger needed, or only local ones?
+- How to calibrate weights?
+- How to fund validators without money?
+- How to engage regulators?
+- How to avoid founder capture?
+- How to motivate participants without money?
+- How to measure quality, not quantity?
+- How to ensure escrow and arbitration for bounties?
+- How to scale payments without a token?
+- How to verify useful compute without waste?
+- How to prevent CU from becoming a de facto currency?
+
+These are subjects of open discussion.
+
+---
+
+## 22. Conclusion
+
+Contribution Ledger is an attempt to take the best of cryptography and distributed systems while removing monetary speculation. It is not a cryptocurrency. It is infrastructure for trust and coordination.
+
+If CL works, communities will be able to:
+
+- keep transparent records of contribution;
+- build reputation without platforms;
+- vote without buying votes;
+- pay for work without intermediaries;
+- cooperate without a token;
+- distribute compute usefully;
+- maintain independence from corporations and states.
+
+It will not replace money. It will complement it where money harms: in trust, reputation, and coordination. And it will give people profit from work, not from speculation.
+
+CL is not a product. It is a protocol. It lives as long as there are communities that use it.
+
+---
+
+## 23. Appendices
+
+### A. Glossary
+
+- **CU** — Contribution Unit.
+- **DID** — Decentralized Identifier.
+- **Ledger** — append-only log of events.
+- **Validator** — node confirming events.
+- **Issuer** — one who issues attestations.
+- **Attestation** — signed claim about identity.
+- **Decay** — reduction of CU over time.
+- **Fork** — ledger separation.
+- **Bounty** — task with payment.
+- **Escrow** — conditional holding of funds until completion.
+- **Useful Work** — verified computation or community help.
+
+### B. Example Contribution Record
+
+```json
+{
+  "type": "contribution",
+  "version": 1,
+  "subject": "did:cl:main:alice",
+  "issuer": "did:cl:org:projectX",
+  "action": "code_review",
+  "context": "repo:github.com/x/y#pr-42",
+  "weight_class": "review",
+  "evidence": [
+    {"type": "hash", "algo": "sha256", "value": "abc..."}
+  ],
+  "timestamp": 1730000000,
+  "signature": "ed25519:..."
+}
+```
+
+### C. Example Bounty
+
+```json
+{
+  "type": "bounty",
+  "issuer": "did:cl:org:startupX",
+  "task": "API documentation",
+  "reward": {"amount": 500, "currency": "USD"},
+  "escrow": "did:cl:escrow:main",
+  "deadline": 1730100000,
+  "requirements": ["3 reviews"],
+  "signature": "ed25519:..."
+}
+```
+
+### D. Example Compute Task
+
+```json
+{
+  "type": "compute.task.create",
+  "issuer": "did:cl:org:ailab",
+  "task": {
+    "kind": "model_training",
+    "dataset": "ipfs://...",
+    "target_metric": {"name": "accuracy", "value": 0.92},
+    "max_runtime_sec": 3600,
+    "gpu_min_vram_gb": 12
+  },
+  "reward": {"amount": 50, "currency": "USD"},
+  "redundancy": 3,
+  "verification": "metric_threshold",
+  "deadline": 1730100000
+}
+```
+
+### E. Example Vote
+
+```json
+{
+  "type": "vote",
+  "proposal": "change_weight_code_review",
+  "options": ["yes", "no", "abstain"],
+  "deadline": 1730100000,
+  "threshold": "2/3",
+  "weighting": "quadratic"
+}
+```
+
+### F. References
+
+- Bitcoin Whitepaper — Satoshi Nakamoto.
+- b-money — Wei Dai.
+- bit gold — Nick Szabo.
+- Hashcash — Adam Back.
+- W3C DID.
+- Verifiable Credentials.
+- Holochain, Nostr, Matrix — tokenless examples.
+- Quadratic Voting — Weyl, Laliberté.
+- Gitcoin, Optimism RetroPGF — contribution-based funding.
+- Golem, iExec, Bittensor — useful work and compute markets.
+- Proof of Useful Work literature.
+
+### G. Licenses
+
+- Text: CC BY-SA 4.0.
+- Code: MIT / Apache 2.0.
+- Specification: open.
+
+---
+
+**End of Version 1.2**
+
+---
